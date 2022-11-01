@@ -1,16 +1,18 @@
-import Menu  from './MenuComponent';
-import Header  from './HeaderComponent';
-import Footer  from './FooterComponent';
+import Menu from './MenuComponent';
+import Header from './HeaderComponent';
+import Footer from './FooterComponent';
 import Home from './HomeComponent';
 import Contact from './ContactComponent';
 import About from './AboutComponent';
 import DishDetail from './DishDetailsComponent';
 import { Component } from 'react';
-import { Routes, Route, Navigate, useParams} from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { withRouter } from '../redux/withRouter';
-const mapStateToProps = state => {
+import { addComment, fetchDishes } from '../redux/ActionCreators';
+import { actions } from 'react-redux-form'
 
+const mapStateToProps = state => {
   return {
     dishes: state.dishes,
     comments: state.comments,
@@ -18,27 +20,42 @@ const mapStateToProps = state => {
     leaders: state.leaders
   }
 }
+
+const mapDispatchToProps = dispatch => ({
+  addComment : (dishId, author, rating, comment) => dispatch(addComment(dishId, author, rating, comment)),
+  fetchDishes: () => { dispatch(fetchDishes()) },
+  resetFeedbackForm: () => { dispatch(actions.reset('feedback'))}
+});
+
+
 class Main extends Component {
 
-  
-  render(){
+  componentDidMount() {
+    this.props.fetchDishes();
+  }
 
+  render() {
     const HomePage = () => {
-      return(
-          <Home 
-              dish={this.props.dishes.filter((dish) => dish.featured)[0]}
-              promotion={this.props.promotions.filter((promo) => promo.featured)[0]}
-              leader={this.props.leaders.filter((leader) => leader.featured)[0]}
-          />
+      return (
+        <Home
+          dish={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
+          dishesLoading={this.props.dishes.isLoading}
+          dishesErrorMsg={this.props.dishes.errorMsg}
+          promotion={this.props.promotions.filter((promo) => promo.featured)[0]}
+          leader={this.props.leaders.filter((leader) => leader.featured)[0]}
+        />
       );
     }
 
     const DishWithId = () => {
       const { dishId } = useParams();
-      return(
-          <DishDetail 
-            dish={this.props.dishes.find((dish) => dish.id === Number(dishId))} 
-            comments={this.props.comments.filter((comment) => comment.dishId === Number(dishId))} />
+      return (
+        <DishDetail
+          dish={this.props.dishes.dishes.find((dish) => dish.id === Number(dishId))}
+          isLoading={this.props.dishes.isLoading}
+          errorMsg={this.props.dishes.errorMsg}
+          comments={this.props.comments.filter((comment) => comment.dishId === Number(dishId))}
+          addComment={this.props.addComment} />
       );
     };
 
@@ -46,12 +63,12 @@ class Main extends Component {
       <div>
         <Header />
         <Routes>
-              <Route path="/home" element={HomePage()}/>
-              <Route exact path="/menu" element={<Menu dishes={this.props.dishes} />} />
-              <Route path='/menu/:dishId' element={<DishWithId />} />
-              <Route exact path="/aboutus" element={<About leaders={this.props.leaders} />} />
-              <Route exact path="/contactus" element={<Contact />} />
-              <Route path="/" element={<Navigate replace to="/home" />} />
+          <Route path="/home" element={HomePage()} />
+          <Route exact path="/menu" element={<Menu dishes={this.props.dishes} />} />
+          <Route path='/menu/:dishId' element={<DishWithId />} />
+          <Route exact path="/aboutus" element={<About leaders={this.props.leaders} />} />
+          <Route exact path="/contactus" element={<Contact resetFeedbackForm={this.props.resetFeedbackForm}/>} />
+          <Route path="/" element={<Navigate replace to="/home" />} />
         </Routes>
         <Footer />
       </div>
@@ -59,4 +76,4 @@ class Main extends Component {
   }
 }
 
-export default withRouter(connect(mapStateToProps)(Main));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Main));
