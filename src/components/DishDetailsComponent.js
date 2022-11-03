@@ -1,21 +1,29 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import { Card, CardImg, CardTitle, CardText, CardBody, Breadcrumb, BreadcrumbItem, Col, Row, Label, Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Loading } from './LoadingComponent';
 import { baseUrl } from '../shared/baseUrl';
+import { FadeTransform, Fade, Stagger } from 'react-animation-components';
 
 
-function RenderComments({ comments, postComment, dishId}) {
+function RenderComments({ comments, postComment, dishId }) {
     if (comments != null) {
-        const allComents = comments.map((comment) => {
-            return (
-                <ul className="list-unstyled">
-                    <li>{comment.comment}</li>
-                    <li>-- {comment.author} , {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date(Date.parse(comment.date)))}</li>
-                </ul>
-            );
-        });
+        const allComents =
+            <Stagger in>
+                {
+                    comments.map((comment) => {
+                        return (
+                            <Fade in>
+                                <ul className="list-unstyled">
+                                    <li>{comment.comment}</li>
+                                    <li>-- {comment.author} , {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date(Date.parse(comment.date)))}</li>
+                                </ul>
+                            </Fade>
+                        );
+                    })
+                }
+            </Stagger>
 
         return (
             <div className="col-md-12 col-md-5 m-1">
@@ -34,13 +42,19 @@ function RenderComments({ comments, postComment, dishId}) {
 
 function RenderDish({ dish }) {
     return (
-        <Card>
-            <CardImg width="100%" object src={baseUrl + dish.image} alt={dish.name} />
-            <CardBody>
-                <CardTitle><h5>{dish.name}</h5></CardTitle>
-                <CardText>{dish.description}</CardText>
-            </CardBody>
-        </Card>
+        <FadeTransform in
+            transformProps={{
+                exitTransform: 'scale(0.5) translateY(-50%)'
+            }}>
+            <Card>
+                <CardImg width="100%" object src={baseUrl + dish.image} alt={dish.name} />
+                <CardBody>
+                    <CardTitle><h5>{dish.name}</h5></CardTitle>
+                    <CardText>{dish.description}</CardText>
+                </CardBody>
+            </Card>
+        </FadeTransform>
+
     );
 }
 
@@ -58,7 +72,7 @@ const DishDetails = (props) => {
             </div>
         );
     }
-    else if (props.errorMsg != null){
+    else if (props.errorMsg != null) {
         return (
             <div className="container" >
                 <div className="row">
@@ -88,9 +102,9 @@ const DishDetails = (props) => {
                     </div>
                     <div className="col-12 col-md-5 m-1">
                         <RenderComments comments={props.comments}
-                                        postComment={props.postComment}
-                                        dishId={props.dish.id}
-                         />
+                            postComment={props.postComment}
+                            dishId={props.dish.id}
+                        />
                     </div>
                 </div>
             </div>
@@ -164,7 +178,7 @@ export class CommentForm extends Component {
                                     <Control.text model=".author" id="author" name='author' placeholder='Your Name'
                                         className="form-control"
                                         validators={{
-                                             minLength: minLength(3), maxLength: maxLength(15)
+                                            minLength: minLength(3), maxLength: maxLength(15)
                                         }} />
                                     <Errors
                                         className="text-danger"
@@ -185,7 +199,7 @@ export class CommentForm extends Component {
                                 </Col>
                             </Col>
                             <Row className="form-group mt-5">
-                                <Col md={{ size: 3, offset: 0}}>
+                                <Col md={{ size: 3, offset: 0 }}>
                                     <Button type="submit" value="submit" color="primary">Submit</Button>
                                 </Col>
                             </Row>
