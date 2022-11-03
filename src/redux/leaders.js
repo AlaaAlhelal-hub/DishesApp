@@ -15,7 +15,6 @@ export const Leaders = ( state = {
 
         case ActionTypes.LEADERS_FAILED:
             return {...state, isLoading: false, errorMsg: action.playload}
-        
 
         default:
             return state;

@@ -1,10 +1,15 @@
 import React from 'react';
-import {Card, CardBody, Breadcrumb, BreadcrumbItem, CardHeader, Media } from 'reactstrap';
+import { Card, CardBody, Breadcrumb, BreadcrumbItem, CardHeader, Media } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { baseUrl } from '../shared/baseUrl';
+import { Loading } from './LoadingComponent';
+import { Fade, Stagger } from 'react-animation-components';
 
-function RenderLeader({leader}){
+
+function RenderLeader({ leader }) {
+
     return (
+        <Fade in>
             <Media tag="li" className='list-unstyled'>
                 <Media left middle>
                     <Media
@@ -17,24 +22,49 @@ function RenderLeader({leader}){
                     <Media heading>{leader.name}</Media>
                     <p>
                         {leader.designation}
-                        <br/>
-                        {leader.description} 
+                        <br />
+                        {leader.description}
                     </p>
                 </Media>
             </Media>
-     
+        </Fade>
     );
 }
 
+
+function RenderLeaders({ leaders, isLoading, errorMsg }) {
+
+    if (isLoading) {
+        return (
+            <Loading />
+        );
+    }
+    else if (errorMsg != null) {
+        return (
+            <h4>{errorMsg}</h4>
+        );
+    }
+    else {
+        const allLeaders =
+            <Stagger in>
+                {
+                    leaders.map((leader) => {
+                        return (
+                            <RenderLeader leader={leader} />
+                        );
+                    })
+                }
+            </Stagger>
+
+
+        return allLeaders;
+    }
+}
+
+
 function About(props) {
 
-    const leaders = props.leaders.leaders.map((leader) => {
-        return (
-            <RenderLeader leader={leader}/>
-        );
-    });
-
-    return(
+    return (
         <div className="container">
             <div className="row">
                 <Breadcrumb>
@@ -44,7 +74,7 @@ function About(props) {
                 <div className="col-12">
                     <h3>About Us</h3>
                     <hr />
-                </div>                
+                </div>
             </div>
             <div className="row row-content">
                 <div className="col-12 col-md-6">
@@ -75,10 +105,10 @@ function About(props) {
                             <blockquote className="blockquote">
                                 <p className="mb-0">You better cut the pizza in four pieces because
                                     I'm not hungry enough to eat six.</p>
-                                    <br/>
+                                <br />
                                 <footer className="blockquote-footer">Yogi Berra,
-                                <cite title="Source Title">The Wit and Wisdom of Yogi Berra,
-                                    P. Pepe, Diversion Books, 2014</cite>
+                                    <cite title="Source Title">The Wit and Wisdom of Yogi Berra,
+                                        P. Pepe, Diversion Books, 2014</cite>
                                 </footer>
                             </blockquote>
                         </CardBody>
@@ -91,7 +121,7 @@ function About(props) {
                 </div>
                 <div className="col-12">
                     <Media list>
-                        {leaders}
+                        <RenderLeaders leaders={props.leaders.leaders} isLoading={props.isLoading} errorMsg={props.errorMsg} />
                     </Media>
                 </div>
             </div>
